@@ -116,6 +116,8 @@ document.addEventListener('click', (e)=>{
 const fantasyToggle  = document.getElementById('fantasyToggle');
 const particlesToggle = document.getElementById('particlesToggle');
 const reduceMotion = document.getElementById('reduceMotion');
+const backgroundToggle = document.getElementById('backgroundToggle');
+const calendarToggle = document.getElementById('calendarToggle');
 
 fantasyToggle.addEventListener('click', ()=>{
   document.body.classList.toggle('fantasy');
@@ -124,6 +126,10 @@ fantasyToggle.addEventListener('click', ()=>{
 particlesToggle.addEventListener('click', ()=>{
   const ff = document.getElementById('fireflies');
   ff.style.display = (ff.style.display==='none') ? 'block' : 'none';
+});
+
+backgroundToggle.addEventListener('click', ()=>{
+  document.body.classList.toggle('new-bg');
 });
 
 reduceMotion.addEventListener('change', (e)=>{
@@ -136,7 +142,6 @@ reduceMotion.addEventListener('change', (e)=>{
     el.style.transform = on ? 'none' : '';
   });
 });
-
 
 // ===== Popup Logic =====
 const modal = document.getElementById('dayPopup');
@@ -236,3 +241,244 @@ function getSinhalaSubjectText(subject, periodsInRow){
   }
   return subject;
 }
+
+
+// ===== New Calendar Functionality =====
+const calendarModal = document.getElementById('calendarModal');
+const closeCalendarBtn = calendarModal.querySelector('.close-calendar');
+const currentMonthYear = document.getElementById('currentMonthYear');
+const calendarBody = document.getElementById('calendarBody');
+const prevMonthBtn = document.getElementById('prevMonth');
+const nextMonthBtn = document.getElementById('nextMonth');
+const sidePanel = document.getElementById('sidePanel');
+const panelDateEl = document.getElementById('panelDate');
+const scheduleContent = document.getElementById('scheduleContent');
+const noteInput = document.getElementById('noteInput');
+const saveNoteBtn = document.getElementById('saveNoteBtn');
+const noteStatusEl = document.getElementById('noteStatus');
+
+// NEW reminder modal elements
+const reminderModal = document.getElementById('reminderModal');
+const reminderNoteEl = document.getElementById('reminderNote');
+const closeReminderBtn = document.getElementById('closeReminderBtn');
+
+let date = new Date();
+let currentYear = date.getFullYear();
+let currentMonth = date.getMonth();
+let selectedDayDiv = null;
+
+let touchStartX = 0;
+let touchEndX = 0;
+const minSwipeDistance = 50;
+
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const dayMap = {
+  "Sunday": [],
+  "Monday": [{ time: '8:00 PM', subject: 'IT Class' }],
+  "Tuesday": [],
+  "Wednesday": [],
+  "Thursday": [],
+  "Friday": [],
+  "Saturday": [{ time: '3:00 PM', subject: 'English Class' }]
+};
+
+function renderCalendar() {
+    calendarBody.innerHTML = '';
+
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const today = new Date();
+
+    currentMonthYear.textContent = `${months[currentMonth]} ${currentYear}`;
+
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        const emptyDiv = document.createElement('div');
+        calendarBody.appendChild(emptyDiv);
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.classList.add('calendar-day');
+        dayDiv.textContent = i;
+        dayDiv.dataset.date = `${currentYear}-${currentMonth + 1}-${i}`;
+
+        // Highlight today's date
+        if (i === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+            dayDiv.classList.add('current-day');
+        }
+
+        // Check for special events
+        const dayOfWeek = new Date(currentYear, currentMonth, i).getDay();
+        const classes = dayMap[dayNames[dayOfWeek]];
+        if (classes.length > 0) {
+            dayDiv.classList.add('special-event');
+        }
+
+        // Check for notes
+        const note = localStorage.getItem(`note-${dayDiv.dataset.date}`);
+        if (note) {
+            dayDiv.classList.add('has-note');
+        }
+        
+        dayDiv.addEventListener('click', () => {
+          if (selectedDayDiv) {
+            selectedDayDiv.classList.remove('selected-day');
+          }
+          dayDiv.classList.add('selected-day');
+          selectedDayDiv = dayDiv;
+          showDayDetails(dayDiv.dataset.date);
+        });
+
+        calendarBody.appendChild(dayDiv);
+    }
+}
+
+function showDayDetails(dateStr) {
+    sidePanel.style.display = 'block';
+
+    scheduleContent.innerHTML = '';
+    const dateObj = new Date(dateStr);
+    const dayName = dayNames[dateObj.getDay()];
+    panelDateEl.textContent = `${dayName}, ${dateStr}`;
+
+    // --- Show Class Schedule ---
+    const classes = dayMap[dayName];
+    if (classes.length === 0) {
+        scheduleContent.innerHTML = '<p>No classes scheduled.</p>';
+    } else {
+        classes.forEach(cls => {
+            const classId = `${dateStr}-${cls.subject.replace(/\s/g, '-')}`;
+            const attendance = localStorage.getItem(classId);
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'schedule-item';
+            if (attendance === 'attended') {
+                itemDiv.classList.add('attended');
+            } else if (attendance === 'missed') {
+                itemDiv.classList.add('missed');
+            }
+
+            itemDiv.innerHTML = `
+                <span>${cls.time}: ${cls.subject}</span>
+                <div class="attendance-buttons">
+                    <button class="attendance-button attended-icon" data-status="attended" data-id="${classId}">✔️</button>
+                    <button class="attendance-button missed-icon" data-status="missed" data-id="${classId}">❌</button>
+                </div>
+            `;
+            scheduleContent.appendChild(itemDiv);
+        });
+    }
+
+    // --- Show Notes ---
+    const note = localStorage.getItem(`note-${dateStr}`) || '';
+    noteInput.value = note;
+    noteStatusEl.textContent = '';
+    
+    // Add event listeners for attendance buttons
+    document.querySelectorAll('.attendance-button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const classId = e.target.dataset.id;
+            const status = e.target.dataset.status;
+            localStorage.setItem(classId, status);
+            updateAttendanceUI(e.target.closest('.schedule-item'), status);
+        });
+    });
+}
+
+function updateAttendanceUI(itemEl, status) {
+    itemEl.classList.remove('attended', 'missed');
+    if (status === 'attended') {
+        itemEl.classList.add('attended');
+    } else if (status === 'missed') {
+        itemEl.classList.add('missed');
+    }
+}
+
+// Button listeners
+calendarToggle.addEventListener('click', () => {
+    calendarModal.style.display = 'flex';
+    sidePanel.style.display = 'none'; // Hide the side panel initially
+    renderCalendar();
+});
+
+closeCalendarBtn.addEventListener('click', () => {
+    calendarModal.style.display = 'none';
+    selectedDayDiv?.classList.remove('selected-day');
+    selectedDayDiv = null;
+    sidePanel.style.display = 'none';
+});
+
+// NEW reminder modal close handler
+closeReminderBtn.addEventListener('click', () => {
+    reminderModal.style.display = 'none';
+});
+
+prevMonthBtn.addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    renderCalendar();
+    sidePanel.style.display = 'none'; // Hide the side panel when changing months
+});
+
+nextMonthBtn.addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    renderCalendar();
+    sidePanel.style.display = 'none'; // Hide the side panel when changing months
+});
+
+saveNoteBtn.addEventListener('click', () => {
+    const selectedDate = panelDateEl.textContent.split(', ')[1];
+    const note = noteInput.value.trim();
+    if (note) {
+        localStorage.setItem(`note-${selectedDate}`, note);
+        noteStatusEl.textContent = 'Note saved!';
+    } else {
+        localStorage.removeItem(`note-${selectedDate}`);
+        noteStatusEl.textContent = 'Note removed!';
+    }
+    renderCalendar(); // Re-render to show/hide note indicator
+});
+
+// Swipe functionality
+calendarModal.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+calendarModal.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipeGesture();
+});
+
+function handleSwipeGesture() {
+    if (touchEndX < touchStartX - minSwipeDistance) {
+        // Swiped left
+        nextMonthBtn.click();
+    } else if (touchEndX > touchStartX + minSwipeDistance) {
+        // Swiped right
+        prevMonthBtn.click();
+    }
+}
+
+
+// ===== New Function to check for today's note and show reminder =====
+function showTodayReminder() {
+  const today = new Date();
+  const todayDateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+  const todayNote = localStorage.getItem(`note-${todayDateStr}`);
+
+  if (todayNote) {
+    reminderNoteEl.textContent = todayNote;
+    reminderModal.style.display = 'flex';
+  }
+}
+
+// Call the function on page load
+document.addEventListener('DOMContentLoaded', showTodayReminder);

@@ -15,6 +15,8 @@
     <div class="hud-left">
       <button id="fantasyToggle" class="btn">⚡ Fantasy Mode</button>
       <button id="particlesToggle" class="btn">✨ Particles</button>
+      <button id="backgroundToggle" class="btn">🎨 Change BG</button>
+      <button id="calendarToggle" class="btn">🗓️ Calendar</button>
     </div>
     <div class="hud-right">
       <label class="switch">
@@ -29,7 +31,6 @@
     <div class="frame-glow"></div>
     <header class="titlebar">
       <h1>10 – B කාලසටහන</h1>
-  
     </header>
 
     <section class="timetable card">
@@ -56,7 +57,6 @@
           <tr><td>8</td><td>ඉංග්‍රීසි</td><td>ගණිතය</td><td>Commerce</td><td>ඉංග්‍රීසි</td><td>ගණිතය</td></tr>
         </tbody>
       </table>
-      
     </section>
 
     <footer class="footer card">
@@ -67,7 +67,6 @@
         <span class="dot dot-ict"></span> I.C.T
         <span class="dot dot-hist"></span> ඉතිහාසය
       </div>
-      
     </footer>
   </main>
 
@@ -78,6 +77,44 @@
       <span class="close">&times;</span>
       <h2 id="popupTitle"></h2>
       <table id="popupTable"></table>
+    </div>
+  </div>
+
+  <div id="calendarModal" class="modal">
+    <div class="modal-content card calendar-with-schedule">
+      <span class="close-calendar">&times;</span>
+      <div class="calendar-panel">
+        <div class="calendar-header">
+          <button id="prevMonth" class="btn modern-nav-btn">◀️</button>
+          <h2 id="currentMonthYear"></h2>
+          <button id="nextMonth" class="btn modern-nav-btn">▶️</button>
+        </div>
+        <div class="calendar-grid-header">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div id="calendarBody" class="calendar-grid"></div>
+      </div>
+      
+      <div id="sidePanel" class="schedule-panel">
+        <h3 id="panelDate"></h3>
+        <div id="scheduleContent"></div>
+
+        <div id="notesContainer">
+            <h3 class="notes-heading">Notes</h3>
+            <textarea id="noteInput" placeholder="Add your notes here..."></textarea>
+            <button id="saveNoteBtn" class="btn save-btn">💾 Save</button>
+            <div id="noteStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="reminderModal" class="modal">
+    <div class="modal-content card">
+      <span class="close-reminder">&times;</span>
+      <h2 id="reminderTitle">Today's Note</h2>
+      <p id="reminderNote"></p>
+      <button id="closeReminderBtn" class="btn">Got it!</button>
     </div>
   </div>
 

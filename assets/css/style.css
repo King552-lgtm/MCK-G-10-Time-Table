@@ -25,6 +25,14 @@ body{
               radial-gradient(1200px 800px at 80% 90%, #260b33 0%, transparent 60%),
               linear-gradient(180deg, var(--bg-1), var(--bg-2));
   overflow-x: hidden;
+  transition: background 1.5s ease;
+}
+
+/* New background class */
+body.new-bg {
+    background: radial-gradient(1200px 800px at 20% 10%, #2e084c 0%, transparent 60%),
+                radial-gradient(1200px 800px at 80% 90%, #084c2e 0%, transparent 60%),
+                linear-gradient(180deg, #180525, #052518);
 }
 
 /* Galaxy canvases */
@@ -82,7 +90,7 @@ body{
   content:"";
   position:absolute; left:3px; top:3px;
   width:22px; height:22px; border-radius:50%;
-  background: radial-gradient(circle at 30% 30%, #fff, #bdf);
+  background: radial-gradient(circle, #fff, #bdf);
   transition: .3s;
   box-shadow: 0 0 8px #bdf;
 }
@@ -399,4 +407,235 @@ tbody td .ripple{
 
 .subtitle {
   display: none;
+}
+
+/* ===== New Calendar Styles ===== */
+#calendarModal .modal-content {
+    max-width: 900px;
+    padding: 30px;
+}
+
+.calendar-with-schedule {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start; /* Align panels at the top */
+}
+
+.calendar-panel {
+    flex: 1;
+}
+
+.schedule-panel {
+    flex: 1;
+    display: none;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding-left: 20px;
+    animation: slideIn 0.5s ease-out;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--neon);
+    text-shadow: 0 0 10px var(--neon);
+}
+
+.calendar-header h2 {
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.calendar-grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 8px;
+    text-align: center;
+}
+
+.calendar-day {
+    padding: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    transform: scale(1.05);
+}
+
+.calendar-day.current-day {
+    background: linear-gradient(45deg, rgba(0, 255, 238, 0.2), rgba(138, 43, 226, 0.2));
+    border: 1px solid var(--neon);
+    box-shadow: 0 0 15px rgba(0, 255, 238, 0.5);
+    font-weight: 700;
+}
+
+.calendar-day.selected-day {
+    background: linear-gradient(45deg, rgba(0, 255, 238, 0.2), rgba(138, 43, 226, 0.2));
+    border: 1px solid var(--neon);
+    box-shadow: 0 0 15px rgba(0, 255, 238, 0.5);
+    font-weight: 700;
+}
+
+.calendar-day.has-note::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neon-3);
+    box-shadow: 0 0 5px var(--neon-3);
+}
+
+.calendar-day.special-event {
+    background: linear-gradient(45deg, rgba(138, 43, 226, 0.2), rgba(255, 99, 71, 0.2));
+    border: 1px solid var(--neon-2);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+}
+
+.calendar-day.special-event .event-info {
+    font-size: 0.7em;
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+.schedule-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+}
+
+.schedule-item.attended {
+    border-color: var(--neon-3);
+}
+
+.schedule-item.missed {
+    border-color: #ff6347; /* Tomato */
+}
+
+.attendance-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.attendance-button {
+    font-size: 1.2em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.attendance-button:hover {
+    transform: scale(1.2);
+}
+
+.attended-icon { color: var(--neon-3); }
+.missed-icon { color: #ff6347; }
+
+
+/* Styles for Notes section */
+#notesContainer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.notes-heading {
+    text-align: center;
+    color: var(--neon);
+    text-shadow: 0 0 8px var(--neon);
+    margin-bottom: 10px;
+}
+
+#noteInput {
+    width: 100%;
+    height: 100px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 8px;
+    resize: none;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+.save-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1.2em;
+    padding: 10px 16px;
+    text-shadow: 0 0 8px var(--neon);
+}
+
+.save-btn:hover {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 14px var(--neon); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px var(--neon-3); }
+    100% { transform: scale(1); box-shadow: 0 0 14px var(--neon); }
+}
+
+/* Styles for Reminder Modal */
+#reminderModal .modal-content {
+    max-width: 450px;
+    text-align: center;
+}
+#reminderModal h2 {
+    color: var(--neon);
+    text-shadow: 0 0 10px var(--neon);
+    margin-bottom: 10px;
+}
+#reminderModal p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    white-space: pre-wrap; /* Preserve newlines from textarea */
+}
+#closeReminderBtn {
+    padding: 10px 20px;
+    font-size: 1em;
 }
